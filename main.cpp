@@ -143,7 +143,7 @@ int main(void)
    TestClass tc{343, 39000, 7, 0, 0};
 
 
-   double td = tc.calc_time_delay_amount(12);
+   double td = tc.calc_time_delay_amount(30);
    uart_print_float(td, 10);
 
 

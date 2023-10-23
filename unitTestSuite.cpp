@@ -84,13 +84,16 @@ bool UnitTestSuite::test_6_test_wavelength_calc()
 {
 
 	tc.set_wavelength();
-	return doubles_equal_to_n_places(tc.wavelength, tc.speed_of_sound/tc.frequency, 7);
+	return doubles_equal_to_n_places(tc.wavelength, tc.speed_of_sound/tc.frequency, 7)&&
+			 doubles_equal_to_n_places(tc.wavelength,0.0087948 , 7);
+
 }
 bool UnitTestSuite::test_7_test_wavelength_calc()
 {
 
 	tc1.set_wavelength();
-	return doubles_equal_to_n_places(tc1.wavelength, tc1.speed_of_sound/tc1.frequency, 7);
+	return doubles_equal_to_n_places(tc1.wavelength, tc1.speed_of_sound/tc1.frequency, 7) &&
+			 doubles_equal_to_n_places(tc1.wavelength,0.0088461 , 7);
 }
 
 

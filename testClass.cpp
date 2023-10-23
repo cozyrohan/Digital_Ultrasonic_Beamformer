@@ -30,6 +30,9 @@ TestClass::TestClass(double sos, int freq, int num_t, double wl, double dist_t )
 	number_transducers = num_t;
 	wavelength = wl;
 	d = dist_t;
+
+	set_wavelength();
+	set_transducer_distance();
 }
 
 void TestClass::set_wavelength()
@@ -64,7 +67,7 @@ double TestClass::calc_time_delay_amount(double theta)
 
 	theta = deg_to_rad(theta);
 
-	double phase_shift_rad = 2.0 * M_PI * sin(theta) / wavelength;
+	double phase_shift_rad = 2.0 * M_PI * d * sin(theta) / wavelength;
 
 	int phase_shift_deg = rad_to_deg(phase_shift_rad);
 
