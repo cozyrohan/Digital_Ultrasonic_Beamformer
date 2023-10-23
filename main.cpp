@@ -83,6 +83,27 @@ void uart_print_float(double value, int dec_digits)
 	delete[] char_rep;
 }
 
+
+void uart_print_test_results(UnitTestSuite u)
+{
+	std::string results = "UNIT TESTS OUTPUT: \n\r";
+	for(int i=0; i<u.get_num_tests(); i++)
+	{
+		results += "Test: " + std::to_string(i) + " result: " + std::to_string(u.tests_status[i]) + "\n\r";
+	}
+
+	int total_len = results.length();
+	unsigned char* char_rep = new unsigned char[total_len];
+
+	for(uint16_t i=0; i<total_len; i++)
+	{
+		char_rep[i] = results[i];
+	}
+
+	HAL_UART_Transmit(&huart3,  (const uint8_t*) char_rep, (uint16_t) total_len, (uint32_t)1000);
+
+	delete[] char_rep;
+}
 /* USER CODE END 0 */
 
 /**
@@ -127,6 +148,10 @@ int main(void)
 
 
    UnitTestSuite uts;
+
+   uts.test_all();
+
+   uart_print_test_results(uts);
 
    //td = tc.calc_time_delay_amount(60);
    //uart_print_float(td, 10);

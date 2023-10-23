@@ -9,22 +9,73 @@
 #include "unitTestSuite.hpp"
 #include "testClass.hpp"
 #include <cassert>
+#include <math.h>
 
 
 
-
-
+// Speed of sound, freq, num_transdoozers, wavelength, dist b/w
 TestClass tc{343, 39000, 7, 0, 0};
+
+
+
+
+bool doubles_equal_to_n_places(double d1, double d2, int num_dec)
+{
+	int i1 = d1 * pow(10, num_dec);
+	int i2 = d2 * pow(10, num_dec);
+
+	return i1 == i2;
+
+}
+
 
 bool UnitTestSuite::test_0_test_deg_rad_conversion()
 {
-	assert((1==1));
 
-
-	return true;
+	return (tc.deg_to_rad(0)==0);
 }
 
-bool UnitTestSuite::test_1_test_rad_deg_conversion()
+bool UnitTestSuite::test_1_test_deg_rad_conversion()
+{
+
+	double v = tc.deg_to_rad(114.592);
+
+	return (floor(v*100.0) == 2*100);
+}
+
+bool UnitTestSuite::test_2_test_deg_rad_conversion()
+{
+
+	double v = tc.deg_to_rad(359.5);
+
+	return (floor(v*10000.0) == 6.2744*10000.0);
+}
+
+
+
+
+
+
+bool UnitTestSuite::test_3_test_rad_deg_conversion()
+{
+	return (tc.rad_to_deg(0)==0);
+}
+bool UnitTestSuite::test_4_test_rad_deg_conversion()
+{
+	double v = tc.rad_to_deg(4.5);
+	return doubles_equal_to_n_places(v, 257.831, 3);
+}
+
+bool UnitTestSuite::test_5_test_rad_deg_conversion()
+{
+	double v = tc.rad_to_deg(120.2);
+	return  doubles_equal_to_n_places(v, 6886.9526, 4);
+}
+
+
+
+
+bool UnitTestSuite::test_6_test_wavelength_calc()
 {
 	assert((1==1));
 
@@ -32,7 +83,7 @@ bool UnitTestSuite::test_1_test_rad_deg_conversion()
 	return true;
 }
 
-bool UnitTestSuite::test_2_test_wavelength_calc()
+bool UnitTestSuite::test_7_test_distance_calc()
 {
 	assert((1==1));
 
@@ -40,15 +91,7 @@ bool UnitTestSuite::test_2_test_wavelength_calc()
 	return true;
 }
 
-bool UnitTestSuite::test_3_test_distance_calc()
-{
-	assert((1==1));
-
-
-	return true;
-}
-
-bool UnitTestSuite::test_4_test_time_delay_calc()
+bool UnitTestSuite::test_8_test_time_delay_calc()
 {
 	assert((1==1));
 
@@ -59,16 +102,23 @@ bool UnitTestSuite::test_4_test_time_delay_calc()
 
 
 
-bool UnitTestSuite::test_all()
+bool* UnitTestSuite::test_all()
 {
 	for(int i = 0; i < num_tests; i++)
 	{
 		//must use this because member functions NEED instances to be called on (not static)
-		(this->*UnitTestSuite::tests[i])();
+		if (   (this->*UnitTestSuite::tests[i])())
+		{
+			tests_status[i] = true;
+		}
+		else
+		{
+			tests_status[i] = false;
+		}
 	}
 
 
-	return true;
+	return tests_status;
 }
 
 

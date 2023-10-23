@@ -14,29 +14,50 @@ class UnitTestSuite
 public:
 	typedef bool (UnitTestSuite::*TestFunc)();
 
-	int num_tests = 1;
-	TestFunc tests[5] = {		&UnitTestSuite::test_0_test_deg_rad_conversion,
-								&UnitTestSuite::test_1_test_rad_deg_conversion,
-								&UnitTestSuite::test_2_test_wavelength_calc,
-								&UnitTestSuite::test_3_test_distance_calc,
-								&UnitTestSuite::test_4_test_time_delay_calc};
+	static const int num_tests = 9;
+	TestFunc tests[num_tests] = {
+								&UnitTestSuite::test_0_test_deg_rad_conversion,
+								&UnitTestSuite::test_1_test_deg_rad_conversion,
+								&UnitTestSuite::test_2_test_deg_rad_conversion,
+
+								&UnitTestSuite::test_3_test_rad_deg_conversion,
+								&UnitTestSuite::test_4_test_rad_deg_conversion,
+								&UnitTestSuite::test_5_test_rad_deg_conversion,
+
+								&UnitTestSuite::test_6_test_wavelength_calc,
+								&UnitTestSuite::test_7_test_distance_calc,
+								&UnitTestSuite::test_8_test_time_delay_calc};
+
+	bool tests_status[num_tests];
 
 	// ALL TEST RETURN TRUE FOR PASS; FALSE OTHERWISE
 
 	bool test_0_test_deg_rad_conversion();
-
-	bool test_1_test_rad_deg_conversion();
-
-	bool test_2_test_wavelength_calc();
-
-	bool test_3_test_distance_calc();
-
-	bool test_4_test_time_delay_calc();
+	bool test_1_test_deg_rad_conversion();
+	bool test_2_test_deg_rad_conversion();
 
 
+	bool test_3_test_rad_deg_conversion();
+	bool test_4_test_rad_deg_conversion();
+	bool test_5_test_rad_deg_conversion();
 
-	bool test_all();
 
+
+
+	bool test_6_test_wavelength_calc();
+	bool test_7_test_wavelength_calc();
+
+	bool test_7_test_distance_calc();
+	bool test_8_test_distance_calc();
+
+	bool test_8_test_time_delay_calc();
+
+
+
+	bool* test_all();
+
+	const int get_num_tests()
+	{return num_tests;}
 
 };
 
