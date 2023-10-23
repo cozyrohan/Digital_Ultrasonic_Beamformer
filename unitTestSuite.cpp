@@ -16,6 +16,8 @@
 // Speed of sound, freq, num_transdoozers, wavelength, dist b/w
 TestClass tc{343, 39000, 7, 0, 0};
 
+TestClass tc1{345, 39000, 7, 0, 0};
+
 
 
 
@@ -32,6 +34,10 @@ bool doubles_equal_to_n_places(double d1, double d2, int num_dec)
 bool UnitTestSuite::test_0_test_deg_rad_conversion()
 {
 
+	//manual verif
+	doubles_equal_to_n_places(231.1, 231.1, 1);
+
+
 	return (tc.deg_to_rad(0)==0);
 }
 
@@ -40,7 +46,7 @@ bool UnitTestSuite::test_1_test_deg_rad_conversion()
 
 	double v = tc.deg_to_rad(114.592);
 
-	return (floor(v*100.0) == 2*100);
+	return (doubles_equal_to_n_places(v, 2.000, 3));
 }
 
 bool UnitTestSuite::test_2_test_deg_rad_conversion()
@@ -48,9 +54,8 @@ bool UnitTestSuite::test_2_test_deg_rad_conversion()
 
 	double v = tc.deg_to_rad(359.5);
 
-	return (floor(v*10000.0) == 6.2744*10000.0);
+	return (doubles_equal_to_n_places(v, 6.274, 3));
 }
-
 
 
 
@@ -77,21 +82,32 @@ bool UnitTestSuite::test_5_test_rad_deg_conversion()
 
 bool UnitTestSuite::test_6_test_wavelength_calc()
 {
-	assert((1==1));
 
-
-	return true;
+	tc.set_wavelength();
+	return doubles_equal_to_n_places(tc.wavelength, tc.speed_of_sound/tc.frequency, 7);
 }
-
-bool UnitTestSuite::test_7_test_distance_calc()
+bool UnitTestSuite::test_7_test_wavelength_calc()
 {
-	assert((1==1));
 
-
-	return true;
+	tc1.set_wavelength();
+	return doubles_equal_to_n_places(tc1.wavelength, tc1.speed_of_sound/tc1.frequency, 7);
 }
 
-bool UnitTestSuite::test_8_test_time_delay_calc()
+
+bool UnitTestSuite::test_8_test_distance_calc()
+{
+	tc.set_wavelength();
+	tc.set_transducer_distance();
+	return doubles_equal_to_n_places(tc.d, tc.wavelength/2.0, 5);
+}
+bool UnitTestSuite::test_9_test_distance_calc()
+{
+	tc1.set_wavelength();
+	tc1.set_transducer_distance();
+	return doubles_equal_to_n_places(tc1.d, tc1.wavelength/2.0, 5);
+}
+
+bool UnitTestSuite::test_10_test_time_delay_calc()
 {
 	assert((1==1));
 

@@ -39,7 +39,7 @@ void TestClass::set_wavelength()
 
 void TestClass::set_transducer_distance()
 {
-	d = wavelength/2;
+	d = wavelength/2.0;
 }
 
 double TestClass::deg_to_rad(double deg)
