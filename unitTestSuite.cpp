@@ -27,7 +27,6 @@ bool doubles_equal_to_n_places(double d1, double d2, int num_dec)
 	int i2 = d2 * pow(10, num_dec);
 
 	return i1 == i2;
-
 }
 
 
@@ -110,12 +109,27 @@ bool UnitTestSuite::test_9_test_distance_calc()
 	return doubles_equal_to_n_places(tc1.d, tc1.wavelength/2.0, 5);
 }
 
+
+
 bool UnitTestSuite::test_10_test_time_delay_calc()
 {
-	assert((1==1));
+	tc.set_wavelength();
+	tc.set_transducer_distance();
+
+	double td = tc.calc_time_delay_amount(30);
 
 
-	return true;
+	return doubles_equal_to_n_places(td, 6.339, 3);;
+}
+bool UnitTestSuite::test_11_test_time_delay_calc()
+{
+	tc.set_wavelength();
+	tc.set_transducer_distance();
+
+	double td = tc.calc_time_delay_amount(15);
+
+
+	return doubles_equal_to_n_places(td, 3.276, 3);
 }
 
 

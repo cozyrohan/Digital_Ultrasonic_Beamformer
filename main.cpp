@@ -62,10 +62,14 @@ static void MX_USART3_UART_Init(void);
 void uart_print_float(double value, int dec_digits)
 {
 	// Function to print to console (screen tty 115200 on Mac)
+	if(dec_digits > 9)
+	{//prevent int overflowing
+			dec_digits = 9;
+	}
 	int whole_part = value;
 	double dec_part = (value - whole_part) ;
 	double idp = (dec_part * std::pow(10, dec_digits));
-	int flo = std::floor(idp);
+	int flo = idp;
 	std::string whole_str = std::to_string(whole_part);
 	std::string dec_str = std::to_string(flo);
 	std::string new_str = whole_str + "." +dec_str + "\n\r";
