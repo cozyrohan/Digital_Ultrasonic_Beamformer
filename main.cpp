@@ -142,8 +142,15 @@ int main(void)
   int num_source = 8;
   double wl = 0; //calc later
   double dist_t = 0.0098 // m -- 9.8 mm
+
+
+
   TestClass phasedArray = TestClass{speed_sound, freq, num_source, wl, dist_t};
   phasedArray.set_wavelength();
+
+
+
+
 
 
   HAL_TIM_Base_Start(&htim1);
@@ -166,6 +173,13 @@ int main(void)
 
   while (1)
   {
+
+
+
+
+
+
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
