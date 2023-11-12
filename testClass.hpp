@@ -51,6 +51,8 @@ public:
 
 	void set_transducer_distance();
 
+	void set_transducer_distance(double dist_meters);
+
 	double deg_to_rad(double deg);
 
 	double rad_to_deg(double rad);

@@ -44,7 +44,10 @@ void TestClass::set_transducer_distance()
 {
 	d = wavelength/2.0;
 }
-
+void TestClass::set_transducer_distance(double dist_meters)
+{
+	d = dist_meters;
+}
 double TestClass::deg_to_rad(double deg)
 {
 	return deg * M_PI /180;

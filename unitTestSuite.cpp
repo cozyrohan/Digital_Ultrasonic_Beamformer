@@ -19,6 +19,7 @@ TestClass tc{343, 39000, 7, 0, 0};
 TestClass tc1{345, 39000, 7, 0, 0};
 
 
+TestClass determine_res{343, 39000, 8, 0, 0};
 
 
 bool doubles_equal_to_n_places(double d1, double d2, int num_dec)
@@ -134,6 +135,28 @@ bool UnitTestSuite::test_11_test_time_delay_calc()
 
 
 
+bool UnitTestSuite::test_12_test_time_delay_calc()
+{
+	determine_res.set_wavelength(); //  lambda = 8.79mm
+	determine_res.set_transducer_distance(0.0098); //in meters -- 9.8mm x 10^03
+
+	double td = tc.calc_time_delay_amount(10);
+	 td = tc.calc_time_delay_amount(20);
+	 td = tc.calc_time_delay_amount(30);
+	 td = tc.calc_time_delay_amount(40);
+
+
+
+}
+bool UnitTestSuite::test_13_test_time_delay_calc()
+{
+	determine_res.set_wavelength(); //  lambda = 8.79mm
+	determine_res.set_transducer_distance(0.0098); //in meters -- 9.8mm x 10^03
+
+	double td = tc.calc_time_delay_amount(5);
+
+
+}
 
 bool* UnitTestSuite::test_all()
 {

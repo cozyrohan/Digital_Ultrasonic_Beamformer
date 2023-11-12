@@ -14,7 +14,7 @@ class UnitTestSuite
 public:
 	typedef bool (UnitTestSuite::*TestFunc)();
 
-	static const int num_tests = 12;
+	static const int num_tests = 14;
 	TestFunc tests[num_tests] = {
 								&UnitTestSuite::test_0_test_deg_rad_conversion,
 								&UnitTestSuite::test_1_test_deg_rad_conversion,
@@ -37,7 +37,11 @@ public:
 
 
 								&UnitTestSuite::test_10_test_time_delay_calc,
-								&UnitTestSuite::test_11_test_time_delay_calc
+								&UnitTestSuite::test_11_test_time_delay_calc,
+
+
+								&UnitTestSuite::test_12_test_time_delay_calc,
+								&UnitTestSuite::test_13_test_time_delay_calc,
 
 	};
 
@@ -66,7 +70,8 @@ public:
 	bool test_10_test_time_delay_calc();
 	bool test_11_test_time_delay_calc();
 
-
+	bool test_12_test_time_delay_calc();
+	bool test_13_test_time_delay_calc();
 
 
 	bool* test_all();
