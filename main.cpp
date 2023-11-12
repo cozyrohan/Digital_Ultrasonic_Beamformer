@@ -21,7 +21,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include <testClass.hpp>
+#include "testClass.hpp"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -74,13 +74,72 @@ static void MX_TIM11_Init(void);
 /* USER CODE BEGIN 0 */
 void delay_microsec(int delay) // max value 10k micro-sec
 {
+	if(delay == 0)
+	{
+		return;
+	}
+
 	__HAL_TIM_SET_COUNTER(&htim8, 0);
 	while(__HAL_TIM_GET_COUNTER(&htim8) < delay)
 	{
-		int a = 1;
+		//int a = 1;
 	}
 }
 
+
+void start_timers_0_7(int delay_us)
+{
+	  HAL_TIM_Base_Start(&htim1);
+	  delay_microsec(delay_us);
+
+	  HAL_TIM_Base_Start(&htim2);
+	  delay_microsec(delay_us);
+
+	  HAL_TIM_Base_Start(&htim3);
+	  delay_microsec(delay_us);
+
+	  HAL_TIM_Base_Start(&htim4);
+	  delay_microsec(delay_us);
+
+	  HAL_TIM_Base_Start(&htim5);
+	  delay_microsec(delay_us);
+
+	  HAL_TIM_Base_Start(&htim9);
+	  delay_microsec(delay_us);
+
+	  HAL_TIM_Base_Start(&htim10);
+	  delay_microsec(delay_us);
+
+	  HAL_TIM_Base_Start(&htim11);
+	  delay_microsec(delay_us);
+}
+
+void start_timers_7_0(int delay_us)
+{
+	  HAL_TIM_Base_Start(&htim11);
+	  delay_microsec(delay_us);
+
+	  HAL_TIM_Base_Start(&htim10);
+	  delay_microsec(delay_us);
+
+	  HAL_TIM_Base_Start(&htim9);
+	  delay_microsec(delay_us);
+
+	  HAL_TIM_Base_Start(&htim5);
+	  delay_microsec(delay_us);
+
+	  HAL_TIM_Base_Start(&htim4);
+	  delay_microsec(delay_us);
+
+	  HAL_TIM_Base_Start(&htim3);
+	  delay_microsec(delay_us);
+
+	  HAL_TIM_Base_Start(&htim2);
+	  delay_microsec(delay_us);
+
+	  HAL_TIM_Base_Start(&htim1);
+	  delay_microsec(delay_us);
+}
 /* USER CODE END 0 */
 
 /**
@@ -137,11 +196,11 @@ int main(void)
 
   //TestClass::TestClass(double sos, int freq, int num_t, double wl, double dist_t )
 
-  int speed_sound = 343; //    m/s
+  double speed_sound = 343; //    m/s
   int freq = 39000; // 39 kHz
   int num_source = 8;
   double wl = 0; //calc later
-  double dist_t = 0.0098 // m -- 9.8 mm
+  double dist_t = 0.0098; // m -- 9.8 mm
 
 
 
@@ -153,33 +212,23 @@ int main(void)
 
 
 
-  HAL_TIM_Base_Start(&htim1);
-
-  HAL_TIM_Base_Start(&htim2);
-
-  HAL_TIM_Base_Start(&htim3);
-
-  HAL_TIM_Base_Start(&htim4);
-
-  HAL_TIM_Base_Start(&htim5);
-
-  HAL_TIM_Base_Start(&htim9);
-
-  HAL_TIM_Base_Start(&htim10);
-
-  HAL_TIM_Base_Start(&htim11);
-
+  // theta is a measure offset from 90, so positive theta is CW, negative is CCW
+  int theta = 0;
 
 
   while (1)
   {
+	  // take in a theta
+	  int td = phasedArray.calc_time_delay_amount(theta);
 
-
-
-
-
-
-
+	  if(theta >= 0)
+	  {
+		  start_timers_0_7(td);
+	  }
+	  else if(theta < 0)
+	  {
+		  start_timers_7_0(td);
+	  }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
