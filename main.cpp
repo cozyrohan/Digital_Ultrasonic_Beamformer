@@ -72,7 +72,9 @@ static void MX_TIM11_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-void delay_microsec(int delay) // max value 10k micro-sec
+
+
+void delay_microsec(unsigned int delay) // max value 10k micro-sec
 {
 	if(delay == 0)
 	{
@@ -86,9 +88,27 @@ void delay_microsec(int delay) // max value 10k micro-sec
 	}
 }
 
+void set_transducer_frequency(int Hz)
+{
+	//assuming 100Mhz clk
+	double clk_period = 1e-8;//1/ (100 * 1000000);
+	double t_period = 1.0 / Hz;
 
+	int counter_value = t_period/clk_period;
+
+	__HAL_TIM_SET_AUTORELOAD(&htim1, counter_value-1);
+//	__HAL_TIM_SET_AUTORELOAD(&htim2, counter_value-1);
+//	__HAL_TIM_SET_AUTORELOAD(&htim3, counter_value-1);
+//	__HAL_TIM_SET_AUTORELOAD(&htim4, counter_value-1);
+//	__HAL_TIM_SET_AUTORELOAD(&htim5, counter_value-1);
+//	__HAL_TIM_SET_AUTORELOAD(&htim9, counter_value-1);
+//	__HAL_TIM_SET_AUTORELOAD(&htim10, counter_value-1);
+//	__HAL_TIM_SET_AUTORELOAD(&htim11, counter_value-1);
+
+}
 void start_timers_0_7(int delay_us)
 {
+	  //compensated phase shifts (jank soloution)
 	  HAL_TIM_Base_Start(&htim1);
 	  delay_microsec(delay_us);
 
@@ -99,19 +119,30 @@ void start_timers_0_7(int delay_us)
 	  delay_microsec(delay_us);
 
 	  HAL_TIM_Base_Start(&htim4);
-	  delay_microsec(delay_us);
+	  delay_microsec(delay_us-1);
 
 	  HAL_TIM_Base_Start(&htim5);
-	  delay_microsec(delay_us);
+	  delay_microsec(delay_us-1);
 
 	  HAL_TIM_Base_Start(&htim9);
-	  delay_microsec(delay_us);
+	  delay_microsec(delay_us-1);
 
 	  HAL_TIM_Base_Start(&htim10);
 	  delay_microsec(delay_us);
 
 	  HAL_TIM_Base_Start(&htim11);
-	  delay_microsec(delay_us);
+	  delay_microsec(delay_us-1);
+
+
+
+	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Start(&htim9, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Start(&htim10, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Start(&htim11, TIM_CHANNEL_1);
 }
 
 void start_timers_7_0(int delay_us)
@@ -139,7 +170,52 @@ void start_timers_7_0(int delay_us)
 
 	  HAL_TIM_Base_Start(&htim1);
 	  delay_microsec(delay_us);
+
+
+	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Start(&htim9, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Start(&htim10, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Start(&htim11, TIM_CHANNEL_1);
 }
+
+void stop_timers_0_7()
+{
+
+
+	HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Stop(&htim2, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Stop(&htim4, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Stop(&htim5, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Stop(&htim9, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Stop(&htim10, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Stop(&htim11, TIM_CHANNEL_1);
+
+	HAL_TIM_Base_Stop(&htim1);
+	HAL_TIM_Base_Stop(&htim2);
+	HAL_TIM_Base_Stop(&htim3);
+	HAL_TIM_Base_Stop(&htim4);
+	HAL_TIM_Base_Stop(&htim5);
+	HAL_TIM_Base_Stop(&htim9);
+	HAL_TIM_Base_Stop(&htim10);
+	HAL_TIM_Base_Stop(&htim11);
+
+
+	// ok gotta reset the counters to 0
+	  MX_TIM1_Init();
+	  MX_TIM2_Init();
+	  MX_TIM3_Init();
+	  MX_TIM4_Init();
+	  MX_TIM5_Init();
+	  MX_TIM9_Init();
+	  MX_TIM10_Init();
+	  MX_TIM11_Init();
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -187,14 +263,17 @@ int main(void)
   /* USER CODE BEGIN WHILE */
 
 
+
   // timers 1-8
   // ideally this is the minimum 1ms delay
-
-
   // consider doing a delay of the period !!! then starting the next one
   // maybe period - 1 us ??
 
-  //TestClass::TestClass(double sos, int freq, int num_t, double wl, double dist_t )
+
+
+  HAL_TIM_Base_Start(&htim8);
+
+
 
   double speed_sound = 343; //    m/s
   int freq = 39000; // 39 kHz
@@ -204,13 +283,66 @@ int main(void)
 
 
 
+  //set_transducer_frequency(39000);
+
+
+  //TestClass::TestClass(double sos, int freq, int num_t, double wl, double dist_t )
   TestClass phasedArray = TestClass{speed_sound, freq, num_source, wl, dist_t};
-  phasedArray.set_wavelength();
+
+  //int del = phasedArray.calc_time_delay_amount(45);
+  // ok due to uproc constraints, del is an integer number of microsec
+  	  phasedArray.set_wavelength();
+  	  int del = 0;
+  	  int calibration = 22;
 
 
 
 
+	calibration = 22 + del;
 
+
+	start_timers_0_7(calibration);
+	HAL_Delay(1500);
+	stop_timers_0_7();
+	HAL_Delay(1500);
+
+
+	del = 3;
+	calibration = 22 + del;
+	start_timers_0_7(calibration);
+	HAL_Delay(1500);
+	stop_timers_0_7();
+	HAL_Delay(1500);
+
+	del = 6;
+	calibration = 22 + del;
+	start_timers_0_7(calibration);
+	HAL_Delay(1500);
+	stop_timers_0_7();
+	HAL_Delay(1500);
+
+	del = 9;
+	calibration = 22 + del;
+	start_timers_0_7(calibration);
+	//HAL_Delay(1500);
+	//stop_timers_0_7();
+
+
+  	  //start_timers_0_7(calibration);
+  	  //start_timers_7_0(calibration);
+
+
+//  	 for(int i = 0; i <= 9; i += 3)
+//  	 {
+//
+//  	  	start_timers_0_7(calibration + i);
+//  	  	HAL_Delay(1500);
+//  	  	stop_timers_0_7();
+//
+//  	 }
+
+
+  		  /* Enable the Capture compare channel */
 
   // theta is a measure offset from 90, so positive theta is CW, negative is CCW
   int theta = 0;
@@ -218,17 +350,26 @@ int main(void)
 
   while (1)
   {
-	  // take in a theta
-	  int td = phasedArray.calc_time_delay_amount(theta);
 
-	  if(theta >= 0)
-	  {
-		  start_timers_0_7(td);
-	  }
-	  else if(theta < 0)
-	  {
-		  start_timers_7_0(td);
-	  }
+
+
+
+
+	  // take in a theta
+//	  int td = phasedArray.calc_time_delay_amount(theta);
+//
+//	  if(theta >= 0)
+//	  {
+//		  start_timers_0_7(td);
+//	  }
+//	  else if(theta < 0)
+//	  {
+//		  start_timers_7_0(td);
+//	  }
+
+
+
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
