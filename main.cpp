@@ -116,7 +116,7 @@ void start_timers_0_7(int delay_us)
 	  delay_microsec(delay_us);
 
 	  HAL_TIM_Base_Start(&htim3);
-	  delay_microsec(delay_us);
+	  delay_microsec(delay_us-1);
 
 	  HAL_TIM_Base_Start(&htim4);
 	  delay_microsec(delay_us-1);
@@ -283,66 +283,70 @@ int main(void)
 
 
 
-  //set_transducer_frequency(39000);
+  	  	  //set_transducer_frequency(39000);
 
 
-  //TestClass::TestClass(double sos, int freq, int num_t, double wl, double dist_t )
-  TestClass phasedArray = TestClass{speed_sound, freq, num_source, wl, dist_t};
+  	  //TestClass::TestClass(double sos, int freq, int num_t, double wl, double dist_t )
 
-  //int del = phasedArray.calc_time_delay_amount(45);
-  // ok due to uproc constraints, del is an integer number of microsec
+  	  TestClass phasedArray = TestClass{speed_sound, freq, num_source, wl, dist_t};
+
+
+  	  //int del = phasedArray.calc_time_delay_amount(45);
+
+  	  // ok due to uproc constraints, del is an integer number of microsec
+
   	  phasedArray.set_wavelength();
-  	  int del = 0;
+  	  int del = 4;
   	  int calibration = 22;
 
+  	  //initially have no delay. I.E. in phase; beam at 0deg
+  	  int transducer_offset = calibration + del;
 
 
 
-	calibration = 22 + del;
+  	  start_timers_7_0(transducer_offset); // start beam at boresight
 
 
-	start_timers_0_7(calibration);
-	HAL_Delay(1500);
-	stop_timers_0_7();
-	HAL_Delay(1500);
-
-
-	del = 3;
-	calibration = 22 + del;
-	start_timers_0_7(calibration);
-	HAL_Delay(1500);
-	stop_timers_0_7();
-	HAL_Delay(1500);
-
-	del = 6;
-	calibration = 22 + del;
-	start_timers_0_7(calibration);
-	HAL_Delay(1500);
-	stop_timers_0_7();
-	HAL_Delay(1500);
-
-	del = 9;
-	calibration = 22 + del;
-	start_timers_0_7(calibration);
-	//HAL_Delay(1500);
-	//stop_timers_0_7();
-
-
-  	  //start_timers_0_7(calibration);
-  	  //start_timers_7_0(calibration);
-
-
-//  	 for(int i = 0; i <= 9; i += 3)
-//  	 {
+		HAL_Delay(1500);
 //
-//  	  	start_timers_0_7(calibration + i);
-//  	  	HAL_Delay(1500);
-//  	  	stop_timers_0_7();
 //
-//  	 }
+//		stop_timers_0_7();
+//	//
+//	//
+//		del = 3;
+//		calibration = 22 + del;
+//		start_timers_0_7(calibration);
+//		HAL_Delay(1500);
+//		stop_timers_0_7();
+//		HAL_Delay(1500);
+
+	//	del = 6;
+	//	calibration = 22 + del;
+	//	start_timers_0_7(calibration);
+	//	HAL_Delay(1500);
+	//	stop_timers_0_7();
+	//	HAL_Delay(1500);
+	//
+	//	del = 9;
+	//	calibration = 22 + del;
+	//	start_timers_0_7(calibration);
+		//HAL_Delay(1500);
+		//stop_timers_0_7();
 
 
-  		  /* Enable the Capture compare channel */
+		  //start_timers_0_7(calibration);
+		  //start_timers_7_0(calibration);
+
+
+	//  	 for(int i = 0; i <= 9; i += 3)
+	//  	 {
+	//
+	//  	  	start_timers_0_7(calibration + i);
+	//  	  	HAL_Delay(1500);
+	//  	  	stop_timers_0_7();
+	//
+	//  	 }
+
 
   // theta is a measure offset from 90, so positive theta is CW, negative is CCW
   int theta = 0;
@@ -353,12 +357,18 @@ int main(void)
 
 
 
+//	  	stop_timers_0_7();
+//	  	del = 1;
+//		transducer_offset += del;
+//		start_timers_0_7(transducer_offset);
+//		HAL_Delay(1500);
 
+	  //
 
 	  // take in a theta
 //	  int td = phasedArray.calc_time_delay_amount(theta);
 //
-//	  if(theta >= 0)
+//	  if(theta > 0)
 //	  {
 //		  start_timers_0_7(td);
 //	  }
