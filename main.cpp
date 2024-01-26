@@ -39,6 +39,7 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+ADC_HandleTypeDef hadc1;
 
 TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim2;
@@ -66,6 +67,10 @@ static void MX_TIM8_Init(void);
 static void MX_TIM9_Init(void);
 static void MX_TIM10_Init(void);
 static void MX_TIM11_Init(void);
+
+static void MX_ADC1_Init(void);
+
+
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -96,7 +101,7 @@ void set_transducer_frequency(int Hz)
 
 	int counter_value = t_period/clk_period;
 
-	__HAL_TIM_SET_AUTORELOAD(&htim1, counter_value-1);
+//	__HAL_TIM_SET_AUTORELOAD(&htim1, counter_value-1);
 //	__HAL_TIM_SET_AUTORELOAD(&htim2, counter_value-1);
 //	__HAL_TIM_SET_AUTORELOAD(&htim3, counter_value-1);
 //	__HAL_TIM_SET_AUTORELOAD(&htim4, counter_value-1);
@@ -215,6 +220,33 @@ void stop_timers_0_7()
 	  MX_TIM10_Init();
 	  MX_TIM11_Init();
 }
+char get_joystick_position()
+{
+	// Joystick ranges for the tristate joystick
+	// L: <1800
+	// C: 1800 > val < 2200
+	// R: > 2200
+
+	int val = 1900;
+	HAL_ADC_PollForConversion(&hadc1, 100);
+	val = HAL_ADC_GetValue(&hadc1);
+	if(val <  1800)
+	{
+		// Left
+		return 'L';
+	}
+	if(val > 2200 )
+	{
+		// Right
+		return 'R';
+	}
+	if (val >1800 && val < 2200)
+	{
+		// Center
+		return 'C';
+	}
+}
+
 
 /* USER CODE END 0 */
 
@@ -255,6 +287,10 @@ int main(void)
   MX_TIM9_Init();
   MX_TIM10_Init();
   MX_TIM11_Init();
+  MX_ADC1_Init();
+
+
+
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -264,96 +300,120 @@ int main(void)
 
 
 
-  // timers 1-8
-  // ideally this is the minimum 1ms delay
-  // consider doing a delay of the period !!! then starting the next one
-  // maybe period - 1 us ??
+
+
+  	HAL_TIM_Base_Start(&htim8);
 
 
 
-  HAL_TIM_Base_Start(&htim8);
+	double speed_sound = 343; //    m/s
+	int freq = 39000; // 39 kHz
+	int num_source = 8;
+	double wl = 0; //calc later
+	double dist_t = 0.0098; // m -- 9.8 mm
 
 
 
-  double speed_sound = 343; //    m/s
-  int freq = 39000; // 39 kHz
-  int num_source = 8;
-  double wl = 0; //calc later
-  double dist_t = 0.0098; // m -- 9.8 mm
+
+	//TestClass::TestClass(double sos, int freq, int num_t, double wl, double dist_t )
+	TestClass phasedArray = TestClass{speed_sound, freq, num_source, wl, dist_t};
 
 
+	//int del = phasedArray.calc_time_delay_amount(45);
 
-  	  	  //set_transducer_frequency(39000);
-
-
-  	  //TestClass::TestClass(double sos, int freq, int num_t, double wl, double dist_t )
-
-  	  TestClass phasedArray = TestClass{speed_sound, freq, num_source, wl, dist_t};
+	// ok due to uproc constraints, del is an integer number of microsec
+	phasedArray.set_wavelength();
 
 
-  	  //int del = phasedArray.calc_time_delay_amount(45);
+	// Let delay be a signed integer.
+	//		del < 0 : steering left, 7 -> 0
+	//		del  0 : steering right, 0 -> 7
+	int del = 0;
 
-  	  // ok due to uproc constraints, del is an integer number of microsec
+	int CALIBRATION = 22;
 
-  	  phasedArray.set_wavelength();
-  	  int del = 4;
-  	  int calibration = 22;
+	//initially have no delay. I.E. in phase; beam at 0deg
+	int transducer_offset = CALIBRATION + del;
 
-  	  //initially have no delay. I.E. in phase; beam at 0deg
-  	  int transducer_offset = calibration + del;
+	start_timers_7_0(transducer_offset); // start beam at boresight
 
-
-
-  	  start_timers_7_0(transducer_offset); // start beam at boresight
-
-
-		HAL_Delay(1500);
-//
-//
-//		stop_timers_0_7();
-//	//
-//	//
-//		del = 3;
-//		calibration = 22 + del;
-//		start_timers_0_7(calibration);
-//		HAL_Delay(1500);
-//		stop_timers_0_7();
-//		HAL_Delay(1500);
-
-	//	del = 6;
-	//	calibration = 22 + del;
-	//	start_timers_0_7(calibration);
-	//	HAL_Delay(1500);
-	//	stop_timers_0_7();
-	//	HAL_Delay(1500);
-	//
-	//	del = 9;
-	//	calibration = 22 + del;
-	//	start_timers_0_7(calibration);
-		//HAL_Delay(1500);
-		//stop_timers_0_7();
-
-
-		  //start_timers_0_7(calibration);
-		  //start_timers_7_0(calibration);
-
-
-	//  	 for(int i = 0; i <= 9; i += 3)
-	//  	 {
-	//
-	//  	  	start_timers_0_7(calibration + i);
-	//  	  	HAL_Delay(1500);
-	//  	  	stop_timers_0_7();
-	//
-	//  	 }
-
+	HAL_Delay(1500);
 
   // theta is a measure offset from 90, so positive theta is CW, negative is CCW
-  int theta = 0;
 
+  int delta_del = 1; // change in delay (us)  per joystick read cycle
+
+
+  uint16_t read_joystick_x = 0;
+  HAL_ADC_Start(&hadc1);
+
+  char cmd = 'C';
 
   while (1)
   {
+
+	  HAL_Delay(500);
+
+	  cmd = get_joystick_position();
+
+	  if(cmd == 'C')
+	  {
+		  del += 0;
+	  }
+	  else if(cmd == 'R')
+	  {
+		  del += delta_del;
+	  }
+	  else if(cmd == 'L')
+	  {
+		  del -= delta_del;
+	  }
+
+
+
+	  if(del == 0)
+	  {
+		  //transducer_offset = CALIBRATION + del;
+		  if(cmd != 'C')
+		  {
+			  transducer_offset = CALIBRATION + del;
+			  stop_timers_0_7();
+			  start_timers_0_7(transducer_offset);
+		  }
+	  }
+
+	  else if(del > 0)
+	  {
+		  //MOVE RIGHT CASE  0 -> 7
+
+
+
+		  if(cmd != 'C')
+		  {
+			  transducer_offset = CALIBRATION + del;
+			  stop_timers_0_7();
+			  start_timers_0_7(transducer_offset);
+		  }
+
+		  //else leave it be
+	  }
+	  else if(del < 0)
+	  {
+		  //MOVE LEFT CASE
+
+		  if(cmd != 'C')
+		  {
+			  transducer_offset = CALIBRATION - del;
+
+			  stop_timers_0_7();
+			  start_timers_7_0(transducer_offset);
+		  }
+
+		  //else leave it be
+	  }
+
+
+
 
 
 
@@ -440,6 +500,58 @@ void SystemClock_Config(void)
   }
 }
 
+
+/**
+  * @brief ADC1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_ADC1_Init(void)
+{
+
+  /* USER CODE BEGIN ADC1_Init 0 */
+
+  /* USER CODE END ADC1_Init 0 */
+
+  ADC_ChannelConfTypeDef sConfig = {0};
+
+  /* USER CODE BEGIN ADC1_Init 1 */
+
+  /* USER CODE END ADC1_Init 1 */
+
+  /** Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion)
+  */
+  hadc1.Instance = ADC1;
+  hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4;
+  hadc1.Init.Resolution = ADC_RESOLUTION_12B;
+  hadc1.Init.ScanConvMode = ADC_SCAN_DISABLE;
+  hadc1.Init.ContinuousConvMode = ENABLE;
+  hadc1.Init.DiscontinuousConvMode = DISABLE;
+  hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
+  hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
+  hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+  hadc1.Init.NbrOfConversion = 1;
+  hadc1.Init.DMAContinuousRequests = DISABLE;
+  hadc1.Init.EOCSelection = ADC_EOC_SEQ_CONV;
+  if (HAL_ADC_Init(&hadc1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
+  */
+  sConfig.Channel = ADC_CHANNEL_4;
+  sConfig.Rank = ADC_REGULAR_RANK_1;
+  sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN ADC1_Init 2 */
+
+  /* USER CODE END ADC1_Init 2 */
+
+}
 /**
   * @brief TIM1 Initialization Function
   * @param None
