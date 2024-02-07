@@ -7,19 +7,19 @@
 
 
 #include "unitTestSuite.hpp"
-#include "testClass.hpp"
 #include <cassert>
 #include <math.h>
+#include "phasedArray.hpp"
 
 
 
 // Speed of sound, freq, num_transdoozers, wavelength, dist b/w
-TestClass tc{343, 39000, 7, 0, 0};
+PhasedArray tc{343, 39000, 7, 0, 0};
 
-TestClass tc1{345, 39000, 7, 0, 0};
+PhasedArray tc1{345, 39000, 7, 0, 0};
 
 
-TestClass determine_res{343, 39000, 8, 0, 0};
+PhasedArray determine_res{343, 39000, 8, 0, 0};
 
 
 bool doubles_equal_to_n_places(double d1, double d2, int num_dec)

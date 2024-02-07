@@ -21,7 +21,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "testClass.hpp"
+#include "phasedArray.hpp"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -93,24 +93,6 @@ void delay_microsec(unsigned int delay) // max value 10k micro-sec
 	}
 }
 
-void set_transducer_frequency(int Hz)
-{
-	//assuming 100Mhz clk
-	double clk_period = 1e-8;//1/ (100 * 1000000);
-	double t_period = 1.0 / Hz;
-
-	int counter_value = t_period/clk_period;
-
-//	__HAL_TIM_SET_AUTORELOAD(&htim1, counter_value-1);
-//	__HAL_TIM_SET_AUTORELOAD(&htim2, counter_value-1);
-//	__HAL_TIM_SET_AUTORELOAD(&htim3, counter_value-1);
-//	__HAL_TIM_SET_AUTORELOAD(&htim4, counter_value-1);
-//	__HAL_TIM_SET_AUTORELOAD(&htim5, counter_value-1);
-//	__HAL_TIM_SET_AUTORELOAD(&htim9, counter_value-1);
-//	__HAL_TIM_SET_AUTORELOAD(&htim10, counter_value-1);
-//	__HAL_TIM_SET_AUTORELOAD(&htim11, counter_value-1);
-
-}
 void start_timers_0_7(int delay_us)
 {
 	  //compensated phase shifts (jank soloution)
@@ -235,16 +217,19 @@ char get_joystick_position()
 		// Left
 		return 'L';
 	}
-	if(val > 2200 )
+	else if(val > 2200 )
 	{
 		// Right
 		return 'R';
 	}
-	if (val >1800 && val < 2200)
+	else if (val >1800 && val < 2200)
 	{
 		// Center
 		return 'C';
 	}
+
+
+	return 'C';
 }
 
 
@@ -299,9 +284,6 @@ int main(void)
   /* USER CODE BEGIN WHILE */
 
 
-
-
-
   	HAL_TIM_Base_Start(&htim8);
 
 
@@ -316,12 +298,7 @@ int main(void)
 
 
 	//TestClass::TestClass(double sos, int freq, int num_t, double wl, double dist_t )
-	TestClass phasedArray = TestClass{speed_sound, freq, num_source, wl, dist_t};
-
-
-	//int del = phasedArray.calc_time_delay_amount(45);
-
-	// ok due to uproc constraints, del is an integer number of microsec
+	PhasedArray phasedArray = PhasedArray{speed_sound, freq, num_source, wl, dist_t};
 	phasedArray.set_wavelength();
 
 
@@ -339,112 +316,82 @@ int main(void)
 
 	HAL_Delay(1500);
 
-  // theta is a measure offset from 90, so positive theta is CW, negative is CCW
+	// theta is a measure offset from 90, so positive theta is CW, negative is CCW
 
-  int delta_del = 1; // change in delay (us)  per joystick read cycle
+	int delta_del = 1; // change in delay (us)  per joystick read cycle
+
+	HAL_ADC_Start(&hadc1);
+
+	char cmd = 'C';
+
+			while (1) // main loop to poll for joysticks and adjust the beam accordingly.
+			{
+
+				HAL_Delay(500);
+				cmd = get_joystick_position();
 
 
-  uint16_t read_joystick_x = 0;
-  HAL_ADC_Start(&hadc1);
-
-  char cmd = 'C';
-
-  while (1)
-  {
-
-	  HAL_Delay(500);
-
-	  cmd = get_joystick_position();
-
-	  if(cmd == 'C')
-	  {
-		  del += 0;
-	  }
-	  else if(cmd == 'R')
-	  {
-		  del += delta_del;
-	  }
-	  else if(cmd == 'L')
-	  {
-		  del -= delta_del;
-	  }
+				if(cmd == 'C')
+				{
+				  del += 0;
+				}
+				else if(cmd == 'R')
+				{
+				  del += delta_del;
+				}
+				else if(cmd == 'L')
+				{
+				  del -= delta_del;
+				}
 
 
 
-	  if(del == 0)
-	  {
-		  //transducer_offset = CALIBRATION + del;
-		  if(cmd != 'C')
-		  {
-			  transducer_offset = CALIBRATION + del;
-			  stop_timers_0_7();
-			  start_timers_0_7(transducer_offset);
-		  }
-	  }
+				if(del == 0)
+				{
+				  //transducer_offset = CALIBRATION + del;
+				  if(cmd != 'C')
+				  {
+					  transducer_offset = CALIBRATION + del;
+					  stop_timers_0_7();
+					  start_timers_0_7(transducer_offset);
+				  }
+				}
 
-	  else if(del > 0)
-	  {
-		  //MOVE RIGHT CASE  0 -> 7
-
-
-
-		  if(cmd != 'C')
-		  {
-			  transducer_offset = CALIBRATION + del;
-			  stop_timers_0_7();
-			  start_timers_0_7(transducer_offset);
-		  }
-
-		  //else leave it be
-	  }
-	  else if(del < 0)
-	  {
-		  //MOVE LEFT CASE
-
-		  if(cmd != 'C')
-		  {
-			  transducer_offset = CALIBRATION - del;
-
-			  stop_timers_0_7();
-			  start_timers_7_0(transducer_offset);
-		  }
-
-		  //else leave it be
-	  }
+				else if(del > 0)
+				{
+					  //MOVE RIGHT CASE  0 -> 7
 
 
 
+					  if(cmd != 'C')
+					  {
+						  transducer_offset = CALIBRATION + del;
+						  stop_timers_0_7();
+						  start_timers_0_7(transducer_offset);
+					  }
 
+					  //else leave it be
+				}
+				else if(del < 0)
+				{
+					  //MOVE LEFT CASE  0 <- 7
 
+					  if(cmd != 'C')
+					  {
+						  transducer_offset = CALIBRATION - del;
 
-//	  	stop_timers_0_7();
-//	  	del = 1;
-//		transducer_offset += del;
-//		start_timers_0_7(transducer_offset);
-//		HAL_Delay(1500);
+						  stop_timers_0_7();
+						  start_timers_7_0(transducer_offset);
+					  }
 
-	  //
+				  //else leave it be
+				}
 
-	  // take in a theta
-//	  int td = phasedArray.calc_time_delay_amount(theta);
-//
-//	  if(theta > 0)
-//	  {
-//		  start_timers_0_7(td);
-//	  }
-//	  else if(theta < 0)
-//	  {
-//		  start_timers_7_0(td);
-//	  }
+				/* USER CODE END WHILE */
 
-
-
-
-    /* USER CODE END WHILE */
-
-    /* USER CODE BEGIN 3 */
-  }
-  /* USER CODE END 3 */
+			/* USER CODE BEGIN 3 */
+			}
+			/* USER CODE END 3 */
 }
 
 /**
